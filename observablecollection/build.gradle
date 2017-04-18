@@ -1,0 +1,57 @@
+apply plugin: 'com.android.library'
+
+final LIBRARY_NAME = 'observablecollection'
+
+ext {
+    bintrayRepo = 'maven'
+    bintrayName = LIBRARY_NAME
+    bintrayOrg = ORGANIZATION_NAME
+
+    publishedGroupId = GROUP
+    libraryName = LIBRARY_NAME
+    artifact = 'observablecollection'
+
+    libraryDescription = 'RxCollection - Observable utils for RecyclerView'
+
+    siteUrl = POM_SCM_URL
+    gitUrl = POM_SCM_CONNECTION
+
+    libraryVersion = VERSION_NAME
+
+    developerId = POM_DEVELOPER_ID
+    developerName = POM_DEVELOPER_NAME
+    developerEmail = POM_DEVELOPER_EMAIL
+
+    licenseName = POM_LICENCE_NAME
+    licenseUrl = POM_LICENCE_URL
+    allLicenses = ["Apache-2.0"]
+}
+
+android {
+    compileSdkVersion 25
+    buildToolsVersion "25.0.2"
+
+    defaultConfig {
+        minSdkVersion 15
+        targetSdkVersion 25
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    compile 'com.android.support:appcompat-v7:25.3.1'
+    compile 'com.android.support:recyclerview-v7:25.3.1'
+    compile 'com.jakewharton.timber:timber:4.5.1'
+    compile "io.reactivex.rxjava2:rxjava:2.0.8"
+    compile "sk.teamsoft:rxlog:1.0.1"
+}
