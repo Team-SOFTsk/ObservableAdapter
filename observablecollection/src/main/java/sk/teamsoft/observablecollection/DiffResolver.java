@@ -13,7 +13,6 @@ public interface DiffResolver<T> {
     /**
      * Method used to determine item equality
      * Determines it viewHolder should be replaced
-     * <p/>
      * @param other new item to compare with the old one
      * @return true if objects are considered equal
      */
@@ -22,9 +21,7 @@ public interface DiffResolver<T> {
     /**
      * Method used to determine contents equality
      * Determines if viewHolder should be updated
-     * <p/>
      * This is only checked if {@link #equalsItem(Object)} returns true
-     * <p/>
      * @param other new item to compare with the old one
      * @return true if contents of these objects are equal
      */
