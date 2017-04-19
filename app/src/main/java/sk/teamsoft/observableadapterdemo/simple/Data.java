@@ -1,4 +1,4 @@
-package sk.teamsoft.observableadapterdemo;
+package sk.teamsoft.observableadapterdemo.simple;
 
 import sk.teamsoft.observablecollection.DiffResolver;
 

@@ -29,9 +29,9 @@ recyclerView.setAdapter(new ObservableAdapter<>(source));
 ```
 3. Prepare View
 ```
-<sk.teamsoft.observableadapterdemo.DataView ...>
+<sk.teamsoft.observableadapterdemo.simple.DataView ...>
     <TextView android:id="@+id/data" .../>
-</sk.teamsoft.observableadapterdemo.DataView>
+</sk.teamsoft.observableadapterdemo.simple.DataView>
 ```
 ```
 public class DataView extends LinearLayout implements BindableView<Data> {

@@ -6,8 +6,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="sk.teamsoft.observableadapterdemo.SimpleUsageActivity"
-    tools:showIn="@layout/activity_main">
+    tools:context="sk.teamsoft.observableadapterdemo.advanced.AdvancedUsageActivity"
+    tools:showIn="@layout/activity_basic">
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/list"

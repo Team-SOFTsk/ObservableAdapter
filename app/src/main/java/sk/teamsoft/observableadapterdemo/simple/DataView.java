@@ -1,4 +1,4 @@
-package sk.teamsoft.observableadapterdemo;
+package sk.teamsoft.observableadapterdemo.simple;
 
 import android.content.Context;
 import android.support.annotation.AttrRes;
@@ -14,6 +14,7 @@ import java.lang.ref.WeakReference;
 
 import io.reactivex.Observable;
 import io.reactivex.functions.Function;
+import sk.teamsoft.observableadapterdemo.R;
 import sk.teamsoft.observablecollection.BindableView;
 
 /**

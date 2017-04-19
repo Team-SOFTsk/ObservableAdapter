@@ -1,9 +1,12 @@
-package sk.teamsoft.observableadapterdemo;
+package sk.teamsoft.observableadapterdemo.simple;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
 import android.widget.Toast;
 
 import java.util.Arrays;
@@ -13,6 +16,8 @@ import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
+import sk.teamsoft.observableadapterdemo.advanced.AdvancedUsageActivity;
+import sk.teamsoft.observableadapterdemo.R;
 import sk.teamsoft.observablecollection.ObservableAdapter;
 import sk.teamsoft.observablecollection.SimpleAdapterSource;
 import timber.log.Timber;
@@ -26,7 +31,7 @@ public class SimpleUsageActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_basic);
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.list);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
@@ -39,6 +44,13 @@ public class SimpleUsageActivity extends AppCompatActivity {
                 new Data("Data 5", "detail 5"),
                 new Data("Data 6", "detail 6")
         ));
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                startActivity(new Intent(SimpleUsageActivity.this, AdvancedUsageActivity.class));
+            }
+        });
     }
 
     @Override protected void onResume() {

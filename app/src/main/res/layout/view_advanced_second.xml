@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<sk.teamsoft.observableadapterdemo.advanced.AdvancedDataView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#70f0"
+    android:clickable="true"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/data"
+        android:layout_width="match_parent"
+        android:layout_height="30dp"
+        android:layout_margin="8dp"
+        android:gravity="center_vertical"
+        tools:text="Data" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#ccc" />
+
+</sk.teamsoft.observableadapterdemo.advanced.AdvancedDataView>
