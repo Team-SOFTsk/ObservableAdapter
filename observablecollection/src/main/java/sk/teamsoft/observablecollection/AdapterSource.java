@@ -3,7 +3,6 @@ package sk.teamsoft.observablecollection;
 import android.support.annotation.LayoutRes;
 import android.support.v7.util.DiffUtil;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -20,6 +19,7 @@ import io.reactivex.subjects.PublishSubject;
  * @see #getViewType(int)
  * @see #getLayout(int)
  */
+@SuppressWarnings({"unused", "WeakerAccess"})
 public abstract class AdapterSource<T> {
 
     private final PublishSubject<List<T>> dataChangeSubject = PublishSubject.create();
@@ -32,19 +32,33 @@ public abstract class AdapterSource<T> {
      */
     private boolean diffDetectMovement = true;
 
+    /**
+     * Constructs observable source
+     * @param data default data set
+     */
     public AdapterSource(List<T> data) {
         this.data = data;
     }
 
+    /**
+     * Constructs observable source
+     * @param data           default data set
+     * @param detectMovement flag to detect movement during data set updates - DiffUtil
+     */
     public AdapterSource(List<T> data, boolean detectMovement) {
         this(data);
         diffDetectMovement = detectMovement;
     }
 
+    /**
+     * Sets the data set to the adapter and automatically dispatches an update
+     * via DiffUtil.DiffResult
+     * @param data new data set
+     */
     public void setData(List<T> data) {
-        final List<T> _oldData = new ArrayList<>(this.data);
+        final DiffUtil.DiffResult diffResult = calculateDiff(this.data, data);
         this.data = data;
-        notifyDiffSubject.onNext(calculateDiff(_oldData, data));
+        notifyDiffSubject.onNext(diffResult);
         dataChangeSubject.onNext(data);
     }
 
@@ -68,8 +82,7 @@ public abstract class AdapterSource<T> {
     /**
      * Implement resource layout type determination regarding its viewType
      */
-    @LayoutRes
-    public abstract int getLayout(int viewType);
+    @LayoutRes public abstract int getLayout(int viewType);
 
     public int getCount() {
         return data.size();

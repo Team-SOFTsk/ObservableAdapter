@@ -9,7 +9,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import java.lang.ref.WeakReference;
-import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.annotations.NonNull;
@@ -37,7 +36,7 @@ import timber.log.Timber;
 public class ObservableAdapter<T> extends RecyclerView.Adapter<ObservableAdapter.ViewHolder<T>> {
 
     private final AdapterSource<T> source;
-    private final PublishSubject<Object> itemEvent = PublishSubject.create();
+    private final PublishSubject<ViewEvent> itemEvent = PublishSubject.create();
     private final CompositeDisposable changeWatcher = new CompositeDisposable();
 
     public ObservableAdapter(AdapterSource<T> source) {
@@ -72,6 +71,7 @@ public class ObservableAdapter<T> extends RecyclerView.Adapter<ObservableAdapter
     @Override public void onAttachedToRecyclerView(RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
 
+        //initial notify
         notifyDataSetChanged();
         changeWatcher.add(source.onNotifyRequested()
                 .compose(RxLog.<DiffUtil.DiffResult>log("notifyRequested"))
@@ -90,14 +90,14 @@ public class ObservableAdapter<T> extends RecyclerView.Adapter<ObservableAdapter
     }
 
     @Override public void onDetachedFromRecyclerView(RecyclerView recyclerView) {
-        //TODO check if all holders are also detached in this point
+        //TODO check if all holders are also detached at this point
         changeWatcher.clear();
         super.onDetachedFromRecyclerView(recyclerView);
     }
 
     @Override public void onViewAttachedToWindow(final ViewHolder<T> holder) {
         super.onViewAttachedToWindow(holder);
-        final Observable<Object> objectObservable = holder.holderView.getObjectObservable();
+        final Observable<Object> objectObservable = holder.holderView.onObservableEvent();
         if (objectObservable != null) {
             holder.disposable = objectObservable
                     .compose(RxLog.log("viewHolder:disposable"))
@@ -106,9 +106,9 @@ public class ObservableAdapter<T> extends RecyclerView.Adapter<ObservableAdapter
                             return o != null;
                         }
                     })
-                    .map(new Function<Object, ObjectEvent>() {
-                        @Override public ObjectEvent apply(@NonNull Object o) throws Exception {
-                            return new ObjectEvent(holder, o);
+                    .map(new Function<Object, ViewEvent>() {
+                        @Override public ViewEvent apply(@NonNull Object o) throws Exception {
+                            return new ViewEvent(holder, o);
                         }
                     })
                     .doOnError(new Consumer<Throwable>() {
@@ -117,10 +117,10 @@ public class ObservableAdapter<T> extends RecyclerView.Adapter<ObservableAdapter
                             Timber.e("ObservableAdapter Error: %s", throwable.getMessage());
                         }
                     })
-                    .subscribe(new Consumer<ObjectEvent>() {
+                    .subscribe(new Consumer<ViewEvent>() {
                         @Override
-                        public void accept(@NonNull ObjectEvent objectEvent) throws Exception {
-                            itemEvent.onNext(objectEvent);
+                        public void accept(@NonNull ViewEvent viewEvent) throws Exception {
+                            itemEvent.onNext(viewEvent);
                         }
                     }, new Consumer<Throwable>() {
                         @Override
@@ -130,8 +130,8 @@ public class ObservableAdapter<T> extends RecyclerView.Adapter<ObservableAdapter
                     });
             holder.watcher.add(holder.disposable);
         } else {
-            //TODO check if needs to be disposed
             Timber.v("onAttached:noObservable");
+            //TODO check if we need to dispose observable if there was any
         }
     }
 
@@ -149,16 +149,17 @@ public class ObservableAdapter<T> extends RecyclerView.Adapter<ObservableAdapter
      * Generic method which dispatches viewHolder events (click, longtap, whatever) to
      * the listeners (typically presenters).
      * Data object is of type Object, but the real type depends on an implementation inside
-     * specific view (makes use of {@link BindableView#getObjectObservable()} method)
+     * specific view (makes use of {@link BindableView#onObservableEvent()} method)
      * @return observable event dispatcher
      */
-    public Observable<Object> onItemEvent() {
+    public Observable<ViewEvent> onItemEvent() {
         return itemEvent;
     }
 
     /**
      * Generic ViewHolder for the purposes of ObservableAdapter use
      */
+    @SuppressWarnings("unused")
     static class ViewHolder<T> extends RecyclerView.ViewHolder {
 
         /**
@@ -173,8 +174,8 @@ public class ObservableAdapter<T> extends RecyclerView.Adapter<ObservableAdapter
         }
 
         private BindableView<T> holderView;
-        @SuppressWarnings("unused") private T item;
-        @SuppressWarnings("unused") private int position = -1;
+        private T item;
+        private int position = -1;
 
         private final CompositeDisposable watcher = new CompositeDisposable();
         private Disposable disposable;
@@ -187,7 +188,7 @@ public class ObservableAdapter<T> extends RecyclerView.Adapter<ObservableAdapter
         void bindTo(T item, int pos) {
             this.item = item;
             this.position = pos;
-            holderView.bindTo(item);
+            holderView.bindItem(item);
         }
 
         void recycle() {
@@ -210,17 +211,24 @@ public class ObservableAdapter<T> extends RecyclerView.Adapter<ObservableAdapter
             }
             disposable = null;
         }
+
+        @Override public String toString() {
+            return "ViewHolder{" +
+                    "holderView=" + holderView +
+                    ",item=" + item +
+                    ",position=" + position +
+                    '}';
+        }
     }
 
     /**
      * Handler class for adapter item events
      */
-    public static class ObjectEvent {
-
+    public static class ViewEvent {
         private WeakReference<ViewHolder> holder;
         private Object data;
 
-        ObjectEvent(ViewHolder holder, Object data) {
+        ViewEvent(ViewHolder holder, Object data) {
             this.holder = new WeakReference<>(holder);
             this.data = data;
         }
@@ -233,6 +241,13 @@ public class ObservableAdapter<T> extends RecyclerView.Adapter<ObservableAdapter
 
         public Object getData() {
             return data;
+        }
+
+        @Override public String toString() {
+            return "ViewEvent{" +
+                    "holder=" + holder.get() +
+                    ",data=" + data +
+                    '}';
         }
     }
 }

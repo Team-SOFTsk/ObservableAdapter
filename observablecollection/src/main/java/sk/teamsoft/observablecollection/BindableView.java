@@ -15,7 +15,7 @@ public interface BindableView<T> {
      *
      * @param item adapter item
      */
-    void bindTo(T item);
+    void bindItem(T item);
 
     /**
      * Return observable events (cast to Object class) here if you want to handle clicks and
@@ -24,5 +24,5 @@ public interface BindableView<T> {
      *
      * @return observable events
      */
-    Observable<Object> getObjectObservable();
+    Observable<Object> onObservableEvent();
 }
