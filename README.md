@@ -41,21 +41,17 @@ public class DataView extends LinearLayout implements BindableView<Data> {
     public DataView(@NonNull Context context) {
         super(context);
     }
-   
 
     ...other constructors...
-    
 
     @Override protected void onFinishInflate() {
         super.onFinishInflate();
         label = (TextView) findViewById(R.id.data);
     }
-    
 
     @Override public void bindItem(Data item) {
         label.setText(item.label);
     }
-    
 
     @Override public Observable<Object> onObservableEvent() {
         return null;
