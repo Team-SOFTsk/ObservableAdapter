@@ -1,4 +1,4 @@
-# ObservableAdapter
+# ObservableCollection
 RecyclerView Adapter for RxJava, separates list's model from Android framework dependencies
 
 [ ![Download](https://api.bintray.com/packages/team-softsk/maven/observablecollection/images/download.svg) ](https://bintray.com/team-softsk/maven/observablecollection/_latestVersion)
@@ -6,6 +6,11 @@ RecyclerView Adapter for RxJava, separates list's model from Android framework d
 
 ### Introduction
 Supports RxJava2 and automatic adapter notify dispatching (via DiffUtils comparison)
+
+### Gradle import
+```
+compile 'sk.teamsoft:observablecollection:0.9.0'
+```
 
 ### Author
 Team-SOFT s.r.o.<br/>
