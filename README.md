@@ -68,6 +68,12 @@ source.setData(data2);
 source.setData(data3);
 ```
 
+### Looking for RxJava1 version?
+Coming soon... contact us for more info
+
+### Looking for Kotlin version?
+Coming soon... contact us for more info
+
 ### Contact
 Team-SOFT s.r.o.<br/>
 [dusan@teamsoft.sk](mailto:dusan@teamsoft.sk)
