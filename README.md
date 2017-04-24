@@ -11,7 +11,7 @@ Supports RxJava2 and automatic adapter notify dispatching (via DiffUtils compari
 
 First, import the library via gradle dependency
 ```
-compile 'sk.teamsoft:observablecollection:0.9.1'
+compile 'sk.teamsoft:observablecollection:0.9.2'
 ```
 
 Check Sample app for both simple and advanced use-cases.
