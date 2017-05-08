@@ -18,7 +18,6 @@ import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.functions.Predicate;
 import io.reactivex.subjects.PublishSubject;
-import sk.teamsoft.rxlog.RxLog;
 import timber.log.Timber;
 
 /**
@@ -46,10 +45,8 @@ public class ObservableAdapter<T> extends RecyclerView.Adapter<ObservableAdapter
     @Override public ViewHolder<T> onCreateViewHolder(ViewGroup parent, int viewType) {
         int layout = source.getLayout(viewType);
         try {
-            @SuppressWarnings("unchecked")
-            final View v = LayoutInflater.from(parent.getContext()).inflate(layout, parent, false);
             //noinspection unchecked
-            return new ViewHolder<>((BindableView<T>) v);
+            return new ViewHolder<>((BindableView<T>) LayoutInflater.from(parent.getContext()).inflate(layout, parent, false));
         } catch (InflateException e) {
             Timber.e(e, "Error inflating view %s %s", layout, parent.getContext().getResources().getResourceEntryName(layout));
             throw e;
@@ -57,7 +54,7 @@ public class ObservableAdapter<T> extends RecyclerView.Adapter<ObservableAdapter
     }
 
     @Override public void onBindViewHolder(ViewHolder<T> holder, int position) {
-        holder.bindTo(source.get(position), position);
+        holder.bind(source.get(position), position);
     }
 
     @Override public int getItemViewType(int position) {
@@ -74,7 +71,6 @@ public class ObservableAdapter<T> extends RecyclerView.Adapter<ObservableAdapter
         //initial notify
         notifyDataSetChanged();
         changeWatcher.add(source.onNotifyRequested()
-                .compose(RxLog.<DiffUtil.DiffResult>log("notifyRequested"))
                 .subscribe(new Consumer<DiffUtil.DiffResult>() {
                                @Override
                                public void accept(@NonNull DiffUtil.DiffResult diffResult) throws Exception {
@@ -84,6 +80,7 @@ public class ObservableAdapter<T> extends RecyclerView.Adapter<ObservableAdapter
                         new Consumer<Throwable>() {
                             @Override
                             public void accept(@NonNull Throwable throwable) throws Exception {
+                                throwable.printStackTrace();
                                 Timber.e(throwable, "Error watching source data");
                             }
                         }));
@@ -100,7 +97,6 @@ public class ObservableAdapter<T> extends RecyclerView.Adapter<ObservableAdapter
         final Observable<Object> objectObservable = holder.holderView.onObservableEvent();
         if (objectObservable != null) {
             holder.disposable = objectObservable
-                    .compose(RxLog.log("viewHolder:disposable"))
                     .filter(new Predicate<Object>() {
                         @Override public boolean test(@NonNull Object o) throws Exception {
                             return o != null;
@@ -114,6 +110,7 @@ public class ObservableAdapter<T> extends RecyclerView.Adapter<ObservableAdapter
                     .doOnError(new Consumer<Throwable>() {
                         @Override
                         public void accept(@NonNull Throwable throwable) throws Exception {
+                            throwable.printStackTrace();
                             Timber.e("ObservableAdapter Error: %s", throwable.getMessage());
                         }
                     })
@@ -125,10 +122,10 @@ public class ObservableAdapter<T> extends RecyclerView.Adapter<ObservableAdapter
                     }, new Consumer<Throwable>() {
                         @Override
                         public void accept(@NonNull Throwable throwable) throws Exception {
+                            throwable.printStackTrace();
                             Timber.e(throwable, "Error:viewHolder:event");
                         }
                     });
-            holder.watcher.add(holder.disposable);
         } else {
             Timber.v("onAttached:noObservable");
             //TODO check if we need to dispose observable if there was any
@@ -170,14 +167,12 @@ public class ObservableAdapter<T> extends RecyclerView.Adapter<ObservableAdapter
             if (view instanceof View) {
                 return (View) view;
             }
-            throw new IllegalStateException("BindableView cannot be cast automatically [" + view + "]");
+            throw new IllegalStateException("BindableView cannot be cast automatically [" + view + "]." +
+                    " Does it extend any View class?");
         }
 
         private BindableView<T> holderView;
         private T item;
-        private int position = -1;
-
-        private final CompositeDisposable watcher = new CompositeDisposable();
         private Disposable disposable;
 
         ViewHolder(BindableView<T> itemView) {
@@ -185,27 +180,22 @@ public class ObservableAdapter<T> extends RecyclerView.Adapter<ObservableAdapter
             this.holderView = itemView;
         }
 
-        void bindTo(T item, int pos) {
+        void bind(T item, int pos) {
             this.item = item;
-            this.position = pos;
             holderView.bindItem(item);
         }
 
         void recycle() {
-            watcher.clear();
-            this.position = -1;
-
-            if (disposable != null && !disposable.isDisposed()) {
-                disposable.dispose();
-            }
-            disposable = null;
+            //do not clear bound item as when detaching
+            dispose();
         }
 
         void detach() {
-            watcher.clear();
             this.item = null;
-            this.position = -1;
+            dispose();
+        }
 
+        private void dispose() {
             if (disposable != null && !disposable.isDisposed()) {
                 disposable.dispose();
             }
@@ -216,7 +206,7 @@ public class ObservableAdapter<T> extends RecyclerView.Adapter<ObservableAdapter
             return "ViewHolder{" +
                     "holderView=" + holderView +
                     ",item=" + item +
-                    ",position=" + position +
+                    ",position=" + getAdapterPosition() +
                     '}';
         }
     }

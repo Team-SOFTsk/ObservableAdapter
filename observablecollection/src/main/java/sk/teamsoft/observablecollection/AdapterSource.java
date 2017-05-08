@@ -1,6 +1,7 @@
 package sk.teamsoft.observablecollection;
 
 import android.support.annotation.LayoutRes;
+import android.support.annotation.Nullable;
 import android.support.v7.util.DiffUtil;
 
 import java.util.List;
@@ -62,7 +63,12 @@ public abstract class AdapterSource<T> {
         dataChangeSubject.onNext(data);
     }
 
-    public T get(int position) {
+    /**
+     * Returns data model from specific position
+     * @param position position to return
+     * @return data at specific position, or null if position is out of current data set
+     */
+    @Nullable public T get(int position) {
         if (position >= 0 && position < data.size()) {
             return data.get(position);
         } else {
@@ -70,6 +76,11 @@ public abstract class AdapterSource<T> {
         }
     }
 
+    /**
+     * Returns position index of given element
+     * @param item item to search for
+     * @return position index
+     */
     public int getIndexOf(T item) {
         return data.indexOf(item);
     }
@@ -84,12 +95,15 @@ public abstract class AdapterSource<T> {
      */
     @LayoutRes public abstract int getLayout(int viewType);
 
+    /**
+     * @return current size of data set
+     */
     public int getCount() {
         return data.size();
     }
 
     /**
-     * Change notifier
+     * Change notifier, emits value (new data) when the data set was changed
      * @return Observable dataSet
      */
     public Observable<List<T>> onDataChange() {
@@ -97,7 +111,7 @@ public abstract class AdapterSource<T> {
     }
 
     /**
-     * Internal helper to tell adapter that it needs to be notified about changes from diff
+     * Internal helper to tell the adapter that it needs to be notified about changes from diff
      * result
      * @return observable diff result
      */
