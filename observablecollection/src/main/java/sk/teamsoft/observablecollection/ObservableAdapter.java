@@ -70,6 +70,7 @@ public class ObservableAdapter<T> extends RecyclerView.Adapter<ObservableAdapter
 
         //initial notify
         notifyDataSetChanged();
+        changeWatcher.clear();
         changeWatcher.add(source.onNotifyRequested()
                 .subscribe(new Consumer<DiffUtil.DiffResult>() {
                                @Override
