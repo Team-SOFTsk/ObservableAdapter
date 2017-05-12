@@ -31,7 +31,7 @@ import timber.log.Timber;
  * - when modifying data source, list is notified appropriately
  * @author Dusan Bartos
  */
-@SuppressWarnings("WeakerAccess")
+@SuppressWarnings("WeakerAccess,unused")
 public class ObservableAdapter<T> extends RecyclerView.Adapter<ObservableAdapter.ViewHolder<T>> {
 
     private final AdapterSource<T> source;
@@ -54,7 +54,7 @@ public class ObservableAdapter<T> extends RecyclerView.Adapter<ObservableAdapter
     }
 
     @Override public void onBindViewHolder(ViewHolder<T> holder, int position) {
-        holder.bind(source.get(position), position);
+        holder.bind(source.get(position));
     }
 
     @Override public int getItemViewType(int position) {
@@ -97,6 +97,12 @@ public class ObservableAdapter<T> extends RecyclerView.Adapter<ObservableAdapter
         super.onViewAttachedToWindow(holder);
         final Observable<Object> objectObservable = holder.holderView.onObservableEvent();
         if (objectObservable != null) {
+            //reattach item reference when holder shown without bind change event
+            final int adapterPosition = holder.getAdapterPosition();
+            if (holder.item == null) {
+                holder.reAttach(source.get(adapterPosition));
+            }
+
             holder.disposable = objectObservable
                     .filter(new Predicate<Object>() {
                         @Override public boolean test(@NonNull Object o) throws Exception {
@@ -105,7 +111,7 @@ public class ObservableAdapter<T> extends RecyclerView.Adapter<ObservableAdapter
                     })
                     .map(new Function<Object, ViewEvent>() {
                         @Override public ViewEvent apply(@NonNull Object o) throws Exception {
-                            return new ViewEvent(holder, o);
+                            return new ViewEvent<>(holder, o);
                         }
                     })
                     .doOnError(new Consumer<Throwable>() {
@@ -181,33 +187,36 @@ public class ObservableAdapter<T> extends RecyclerView.Adapter<ObservableAdapter
             this.holderView = itemView;
         }
 
-        void bind(T item, int pos) {
+        void bind(T item) {
             this.item = item;
             holderView.bindItem(item);
         }
 
         void recycle() {
-            //do not clear bound item as when detaching
-            dispose();
+            detach();
         }
 
         void detach() {
             this.item = null;
-            dispose();
-        }
-
-        private void dispose() {
             if (disposable != null && !disposable.isDisposed()) {
                 disposable.dispose();
             }
             disposable = null;
         }
 
+        void reAttach(T item) {
+            this.item = item;
+        }
+
+        @Nullable T getItem() {
+            return item;
+        }
+
         @Override public String toString() {
             return "ViewHolder{" +
                     "holderView=" + holderView +
                     ",item=" + item +
-                    ",position=" + getAdapterPosition() +
+                    ",pos=" + getAdapterPosition() +
                     '}';
         }
     }
@@ -215,19 +224,24 @@ public class ObservableAdapter<T> extends RecyclerView.Adapter<ObservableAdapter
     /**
      * Handler class for adapter item events
      */
-    public static class ViewEvent {
-        private WeakReference<ViewHolder> holder;
+    public static class ViewEvent<T> {
+        private WeakReference<ViewHolder<T>> holder;
         private Object data;
 
-        ViewEvent(ViewHolder holder, Object data) {
+        ViewEvent(ViewHolder<T> holder, Object data) {
             this.holder = new WeakReference<>(holder);
             this.data = data;
         }
 
-        @SuppressWarnings("unused")
-        @Nullable
-        public ViewHolder getView() {
+        @Nullable public ViewHolder<T> getView() {
             return holder.get();
+        }
+
+        @Nullable public T getItem() {
+            if (holder.get() != null) {
+                return holder.get().getItem();
+            }
+            return null;
         }
 
         public Object getData() {

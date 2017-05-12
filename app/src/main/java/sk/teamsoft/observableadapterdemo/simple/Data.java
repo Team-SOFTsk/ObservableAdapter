@@ -1,5 +1,7 @@
 package sk.teamsoft.observableadapterdemo.simple;
 
+import android.support.annotation.NonNull;
+
 import sk.teamsoft.observablecollection.DiffResolver;
 
 /**
@@ -16,11 +18,11 @@ public class Data implements DiffResolver<Data> {
         this.detail = detail;
     }
 
-    @Override public boolean equalsItem(Data other) {
+    @Override public boolean equalsItem(@NonNull Data other) {
         return label.equals(other.label);
     }
 
-    @Override public boolean areContentsTheSame(Data other) {
+    @Override public boolean areContentsTheSame(@NonNull Data other) {
         return detail.equals(other.detail);
     }
 }

@@ -1,5 +1,7 @@
 package sk.teamsoft.observableadapterdemo.advanced;
 
+import android.support.annotation.NonNull;
+
 import sk.teamsoft.observablecollection.DiffResolver;
 
 /**
@@ -18,11 +20,11 @@ public class AdvancedData implements DiffResolver<AdvancedData> {
         this.viewType = viewType;
     }
 
-    @Override public boolean equalsItem(AdvancedData other) {
+    @Override public boolean equalsItem(@NonNull AdvancedData other) {
         return viewType.equals(other.viewType) && label.equals(other.label);
     }
 
-    @Override public boolean areContentsTheSame(AdvancedData other) {
+    @Override public boolean areContentsTheSame(@NonNull AdvancedData other) {
         return detail.equals(other.detail);
     }
 }
