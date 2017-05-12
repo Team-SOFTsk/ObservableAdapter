@@ -1,5 +1,7 @@
 package sk.teamsoft.observablecollection;
 
+import android.support.annotation.NonNull;
+
 /**
  * Interface intended for non-trivial comparison for DiffUtils
  * If object does not implement this interface, it will be compared by default with
@@ -16,7 +18,7 @@ public interface DiffResolver<T> {
      * @param other new item to compare with the old one
      * @return true if objects are considered equal
      */
-    boolean equalsItem(T other);
+    boolean equalsItem(@NonNull T other);
 
     /**
      * Method used to determine contents equality
@@ -25,5 +27,5 @@ public interface DiffResolver<T> {
      * @param other new item to compare with the old one
      * @return true if contents of these objects are equal
      */
-    boolean areContentsTheSame(T other);
+    boolean areContentsTheSame(@NonNull T other);
 }
