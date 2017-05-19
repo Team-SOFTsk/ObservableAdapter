@@ -1,5 +1,6 @@
 package sk.teamsoft.observablecollection;
 
+import android.content.res.Resources;
 import android.support.annotation.Nullable;
 import android.support.v7.util.DiffUtil;
 import android.support.v7.widget.RecyclerView;
@@ -48,7 +49,11 @@ public class ObservableAdapter<T> extends RecyclerView.Adapter<ObservableAdapter
             //noinspection unchecked
             return new ViewHolder<>((BindableView<T>) LayoutInflater.from(parent.getContext()).inflate(layout, parent, false));
         } catch (InflateException e) {
-            Timber.e(e, "Error inflating view %s %s", layout, parent.getContext().getResources().getResourceEntryName(layout));
+            try {
+                Timber.e(e, "Error inflating view %s %s", layout, parent.getContext().getResources().getResourceEntryName(layout));
+            } catch (Resources.NotFoundException rnfe) {
+                Timber.e(e, "Error inflating view %s", layout);
+            }
             throw e;
         }
     }

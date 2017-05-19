@@ -23,9 +23,8 @@ public class CustomSource extends AdapterSource<AdvancedData> {
             case Second:
                 return 2;
             case Third:
-                return 3;
             default:
-                return 0;
+                return 3;
         }
     }
 

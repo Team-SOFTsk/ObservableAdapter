@@ -4,6 +4,7 @@ import android.support.annotation.LayoutRes;
 import android.support.annotation.Nullable;
 import android.support.v7.util.DiffUtil;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.Observable;
@@ -26,6 +27,7 @@ public abstract class AdapterSource<T> {
     private final PublishSubject<List<T>> dataChangeSubject = PublishSubject.create();
     private final PublishSubject<DiffUtil.DiffResult> notifyDiffSubject = PublishSubject.create();
     protected List<T> data;
+    protected List<Integer> valueHashCache;
     /**
      * Parameter which determines if diffUtils checks for movement
      * This is true by default, but if you need extra optimization (i.e. when there is no need
@@ -57,8 +59,9 @@ public abstract class AdapterSource<T> {
      * @param data new data set
      */
     public void setData(List<T> data) {
-        final DiffUtil.DiffResult diffResult = calculateDiff(this.data, data);
+        final DiffUtil.DiffResult diffResult = calculateDiff(this.data, data, valueHashCache);
         this.data = data;
+        this.valueHashCache = createValueHashList();
         notifyDiffSubject.onNext(diffResult);
         dataChangeSubject.onNext(data);
     }
@@ -120,6 +123,24 @@ public abstract class AdapterSource<T> {
     }
 
     /**
+     * Prepares cached value for MutableResolvers
+     * @return list of hashes
+     */
+    private List<Integer> createValueHashList() {
+        final List<Integer> list = new ArrayList<>(data.size());
+        for (T item: data) {
+            //in case there are multiple types of data in adapter, and only some of them implement
+            //MutableDiffResolver, we need to check each item's type
+            if (item instanceof MutableDiffResolver) {
+                list.add(((MutableDiffResolver) item).valueHash());
+            } else {
+                list.add(null);
+            }
+        }
+        return list;
+    }
+
+    /**
      * Calculates dataSet diff internally, to be able to dispatch notify events to adapter
      * automatically without any need to monitor insert/remove/move events explicitly
      * <p>
@@ -128,7 +149,7 @@ public abstract class AdapterSource<T> {
      * @param newData new dataSet
      * @return diff result
      */
-    private DiffUtil.DiffResult calculateDiff(final List<T> oldData, final List<T> newData) {
+    private DiffUtil.DiffResult calculateDiff(final List<T> oldData, final List<T> newData, final List<Integer> cachedValueHashes) {
         return DiffUtil.calculateDiff(new DiffUtil.Callback() {
             @Override
             public int getOldListSize() {
@@ -153,11 +174,14 @@ public abstract class AdapterSource<T> {
             @Override
             public boolean areContentsTheSame(int oldItemPosition, int newItemPosition) {
                 final T oldItem = oldData.get(oldItemPosition);
-                if (oldItem instanceof DiffResolver) {
+                final T newItem = newData.get(oldItemPosition);
+                if (newItem instanceof MutableDiffResolver) {
+                    return ((MutableDiffResolver) newItem).valueHash() == cachedValueHashes.get(oldItemPosition);
+                } else if (oldItem instanceof DiffResolver) {
                     //noinspection unchecked
-                    return ((DiffResolver) oldItem).areContentsTheSame(newData.get(newItemPosition));
+                    return ((DiffResolver) oldItem).areContentsTheSame(newItem);
                 }
-                return oldItem.hashCode() == newData.get(newItemPosition).hashCode();
+                return oldItem.hashCode() == newItem.hashCode();
             }
         }, diffDetectMovement);
     }

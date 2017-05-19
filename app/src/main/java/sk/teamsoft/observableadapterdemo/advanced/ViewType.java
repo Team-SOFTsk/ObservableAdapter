@@ -6,5 +6,5 @@ package sk.teamsoft.observableadapterdemo.advanced;
  */
 
 public enum ViewType {
-    First, Second, Third
+    First, Second, Third, Mutated
 }

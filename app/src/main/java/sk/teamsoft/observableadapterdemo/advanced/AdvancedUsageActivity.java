@@ -1,13 +1,16 @@
 package sk.teamsoft.observableadapterdemo.advanced;
 
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
 import android.widget.Toast;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
@@ -26,6 +29,8 @@ public class AdvancedUsageActivity extends AppCompatActivity {
     private final ObservableAdapter<AdvancedData> adapter = new ObservableAdapter<>(source);
     private final CompositeDisposable disposable = new CompositeDisposable();
 
+    private List<AdvancedData> data;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,14 +39,26 @@ public class AdvancedUsageActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
 
-        source.setData(Arrays.asList(
+        data = Arrays.asList(
                 new AdvancedData("Data 1", "detail 1", ViewType.First),
                 new AdvancedData("Data 2", "detail 2", ViewType.Second),
                 new AdvancedData("Data 3", "detail 3", ViewType.Second),
                 new AdvancedData("Data 4", "detail 4", ViewType.Second),
                 new AdvancedData("Data 5", "detail 5", ViewType.Third),
                 new AdvancedData("Data 6", "detail 6", ViewType.Third)
-        ));
+        );
+        source.setData(data);
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                int round = (int) Math.round(Math.random() * (data.size() - 1));
+                AdvancedData d = data.get(round);
+                d.viewType = ViewType.Mutated;
+                source.setData(data);
+                Toast.makeText(AdvancedUsageActivity.this, "Mutation at " + round, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override protected void onResume() {

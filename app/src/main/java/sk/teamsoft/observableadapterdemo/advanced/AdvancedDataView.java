@@ -31,6 +31,7 @@ public class AdvancedDataView extends LinearLayout implements BindableView<Advan
     private WeakReference<AdvancedData> itemReference;
 
     private TextView label;
+    private TextView detail;
 
     public AdvancedDataView(@NonNull Context context) {
         super(context);
@@ -47,10 +48,12 @@ public class AdvancedDataView extends LinearLayout implements BindableView<Advan
     @Override protected void onFinishInflate() {
         super.onFinishInflate();
         label = (TextView) findViewById(R.id.data);
+        detail = (TextView) findViewById(R.id.data_detail);
     }
 
     @Override public void bindItem(AdvancedData item) {
-        label.setText(item.label);
+        label.setText(item.label + "[" + item.viewType + "]");
+        detail.setText(item.detail);
 
         itemReference = new WeakReference<AdvancedData>(item);
     }
