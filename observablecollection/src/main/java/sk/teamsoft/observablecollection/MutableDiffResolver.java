@@ -10,8 +10,8 @@ package sk.teamsoft.observablecollection;
  * of items which implement {@link MutableDiffResolver}, and the next time change is detected,
  * we compare those cached values with new ones (to determine if item contents changed).
  *
- * This is only used in {@link android.support.v7.util.DiffUtil.Callback#areContentsTheSame(int, int)}
- * so only for items, which return true in {@link android.support.v7.util.DiffUtil.Callback#areItemsTheSame(int, int)}
+ * This is only used in android.support.v7.util.DiffUtil.Callback#areContentsTheSame(int, int)
+ * so only for items, which return true in android.support.v7.util.DiffUtil.Callback#areItemsTheSame(int, int)
  *
  * Implementation of this resolver is very similar to generating/writing {@link Object#hashCode()}
  * method for regular data objects
