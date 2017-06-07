@@ -169,7 +169,7 @@ public class ObservableAdapter<T> extends RecyclerView.Adapter<ObservableAdapter
      * Generic ViewHolder for the purposes of ObservableAdapter use
      */
     @SuppressWarnings("unused")
-    static class ViewHolder<T> extends RecyclerView.ViewHolder {
+    public static class ViewHolder<T> extends RecyclerView.ViewHolder {
 
         /**
          * AutoCasts interface to {@link View} type
