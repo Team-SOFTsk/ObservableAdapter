@@ -3,6 +3,7 @@ package sk.teamsoft.observablecollection;
 import android.content.res.Resources;
 import android.support.annotation.Nullable;
 import android.support.v7.util.DiffUtil;
+import android.support.v7.util.ListUpdateCallback;
 import android.support.v7.widget.RecyclerView;
 import android.view.InflateException;
 import android.view.LayoutInflater;
@@ -37,6 +38,7 @@ public class ObservableAdapter<T> extends RecyclerView.Adapter<ObservableAdapter
 
     private final AdapterSource<T> source;
     private final PublishSubject<ViewEvent> itemEvent = PublishSubject.create();
+    private final PublishSubject<Boolean> requestScrollEvent = PublishSubject.create();
     private final CompositeDisposable changeWatcher = new CompositeDisposable();
 
     public ObservableAdapter(AdapterSource<T> source) {
@@ -80,6 +82,13 @@ public class ObservableAdapter<T> extends RecyclerView.Adapter<ObservableAdapter
                 .subscribe(new Consumer<DiffUtil.DiffResult>() {
                                @Override
                                public void accept(@NonNull DiffUtil.DiffResult diffResult) throws Exception {
+                                   diffResult.dispatchUpdatesTo(new SimpleUpdateCallback() {
+                                       @Override public void onInserted(int position, int count) {
+                                           if (position == 0) {
+                                               requestScrollEvent.onNext(Boolean.TRUE);
+                                           }
+                                       }
+                                   });
                                    diffResult.dispatchUpdatesTo(ObservableAdapter.this);
                                }
                            },
@@ -138,9 +147,6 @@ public class ObservableAdapter<T> extends RecyclerView.Adapter<ObservableAdapter
                             Timber.e(throwable, "Error:viewHolder:event");
                         }
                     });
-        } else {
-            Timber.v("onAttached:noObservable");
-            //TODO check if we need to dispose observable if there was any
         }
     }
 
@@ -152,6 +158,16 @@ public class ObservableAdapter<T> extends RecyclerView.Adapter<ObservableAdapter
     @Override public void onViewRecycled(ViewHolder<T> holder) {
         holder.recycle();
         super.onViewRecycled(holder);
+    }
+
+    /**
+     * Notify that list inserted new items in front of the existing collection
+     * You can use this to detect when you need to force list to scroll up (i.e. when list
+     * was scrolled to the top, and UI maintained scroll position after collection was updated)
+     * @return observable event
+     */
+    public Observable<Boolean> onRequestScrollUp() {
+        return requestScrollEvent;
     }
 
     /**
@@ -259,5 +275,19 @@ public class ObservableAdapter<T> extends RecyclerView.Adapter<ObservableAdapter
                     ",data=" + data +
                     '}';
         }
+    }
+
+    /**
+     * Helper class for better readability
+     */
+    static class SimpleUpdateCallback implements ListUpdateCallback {
+
+        @Override public void onInserted(int position, int count) {}
+
+        @Override public void onRemoved(int position, int count) {}
+
+        @Override public void onMoved(int fromPosition, int toPosition) {}
+
+        @Override public void onChanged(int position, int count, Object payload) {}
     }
 }
