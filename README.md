@@ -19,13 +19,12 @@ Check Sample app for both simple and advanced use-cases.
 ### Simple case
 
 1. Create source (here, `Data` is the model class)
-```
-SimpleAdapterSource<Data> source = new SimpleAdapterSource<>(Collections.<Data>emptyList(), R.layout.view_data);
+```kotlin
+val source = SimpleAdapterSource<Data>(emptyList(), R.layout.view_data)
 ```
 2. Create Adapter and set to RecyclerView
-```
-recyclerView = (RecyclerView) findViewById(...)             //or use Butterknife
-recyclerView.setAdapter(new ObservableAdapter<>(source));
+```kotlin
+recyclerView.adapter = ObservableAdapter(source)
 ```
 3. Prepare View
 ```
@@ -33,50 +32,34 @@ recyclerView.setAdapter(new ObservableAdapter<>(source));
     <TextView android:id="@+id/data" .../>
 </sk.teamsoft.observableadapterdemo.simple.DataView>
 ```
-```
-public class DataView extends LinearLayout implements BindableView<Data> {
+```kotlin
+class DataView @JvmOverloads constructor(
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0
+) : LinearLayout(context, attrs, defStyleAttr), BindableView<Data> {
 
-    private TextView label;
+    private val label: TextView by lazy { findViewById(R.id.data) }
+    private val detail: TextView by lazy { findViewById(R.id.data_detail) }
 
-    public DataView(@NonNull Context context) {
-        super(context);
-    }
+    override val observableEvent: Observable<Any>?
+        get() = RxView.clicks(this)
 
-    ...other constructors...
-
-    @Override protected void onFinishInflate() {
-        super.onFinishInflate();
-        label = (TextView) findViewById(R.id.data);
-    }
-
-    @Override public void bindItem(Data item) {
-        label.setText(item.label);
-    }
-
-    @Override public Observable<Object> onObservableEvent() {
-        return null;
+    override fun bindTo(item: Data) {
+        label.text = item.label
+        detail.text = item.detail
     }
 }
 ```
 
 4. Set data
-```
-source.setData(data1);
-...
-source.setData(data2);
-...
-source.setData(data3);
+```kotlin
+source.data = listOf(data1, data2, data3)
 ```
 
 ### Advanced use case
 
 Take a look at [Advanced demo](https://github.com/Team-SOFTsk/ObservableAdapter/tree/master/app/src/main/java/sk/teamsoft/observableadapterdemo/advanced)
-
-### Looking for RxJava1 version?
-Coming soon... contact us for more info
-
-### Looking for Kotlin version?
-Coming soon... contact us for more info
 
 ### Contact
 Team-SOFT s.r.o.<br/>
